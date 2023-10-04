@@ -1,0 +1,6 @@
+Fort Denison, Sydney: https://uhslc.soest.hawaii.edu/data/csv/fast/hourly/h333.csv
+Booby Island, Qnsland: https://uhslc.soest.hawaii.edu/data/csv/fast/hourly/h336.csv
+Freemantle, WA: https://uhslc.soest.hawaii.edu/data/csv/fast/hourly/h175.csv
+
+FD: semi-diurnal; Booby: Mixed; Freemantle: diurnal
+
