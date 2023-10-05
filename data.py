@@ -72,8 +72,29 @@ fig_summary.tight_layout()
 
 import uptide
 tide = uptide.Tides(['M2'])
-tide.set_initial_time(
-amp,pha = uptide.harmonic_analysis(tide, F_2008['Tide'].to_numpy(), F_2008.index.astype('int64').to_numpy())
+
+
+
+tide.set_initial_time(datetime.datetime(2008,1,1,0,0,0))
+seconds_since = (F_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
+amp,pha = uptide.harmonic_analysis(tide, F_2008['Tide'].to_numpy()/1000, seconds_since)
+
+# give 0.053m for M2. Actual is 0,052m
+
+seconds_since = (FD_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
+amp,pha = uptide.harmonic_analysis(tide, FD_2008['Tide'].to_numpy()/1000, seconds_since)
+
+
+seconds_since = (BI_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
+amp,pha = uptide.harmonic_analysis(tide, BI_2008['Tide'].to_numpy()/1000, seconds_since)
+
+
+import pytz
+tz = pytz.timezone("Australia/Sydney")
+tide.set_initial_time(datetime.datetime(2008,1,1,0,0,0))
+seconds_since = (BI_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0,tzinfo=tz).timestamp()
+
+
 
 # wget data
 # munge dates (need function to do this; create module for common crap like this)
