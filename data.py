@@ -54,7 +54,7 @@ ax.set_xlabel("Date")
 ax.set_ylabel("Water height (mm)")
 ax.tick_params(axis='x', rotation=45)
 ax.legend()
-ax.set_xlim([datetime.date(2008, 6, 1), datetime.date(2008, 7, 1)])
+ax.set_xlim([datetime.date(2008, 1, 1), datetime.date(2008, 12, 31)])
 fig_summary.tight_layout()
 
 FD_2008 = extract_single_year_remove_mean(2008, Fort_Denison)
@@ -114,29 +114,20 @@ t = np.arange(0, 365*24*3600, 600)
 eta = tide.from_amplitude_phase(amp, pha, t)
 fig_summary=plt.figure()
 ax=fig_summary.add_subplot(111)
-fd = ax.plot(FD_2008['Tide'], color="blue", lw=1, label="Fort Denison")
+fd = ax.plot(seconds_since, FD_2008['Tide']/1000, color="blue", lw=1, label="Fort Denison")
 bi = ax.plot(t, eta, color="orange", lw=1, label="M2 only")
 ax.set_xlabel("Date")
 ax.set_ylabel("Water height (mm)")
 ax.tick_params(axis='x', rotation=45)
+ax.set_xlim([0, 14*24*60*60])
 ax.legend()
 #ax.set_xlim([datetime.date(2008, 6, 1), datetime.date(2008, 7, 1)])
 fig_summary.tight_layout()
 
+# add S2, K1, O1
 
-# wget data
-# munge dates (need function to do this; create module for common crap like this)
-# plot
-# plot subset
-# do same for other data
-# plot each station as sep line for same dates
 
-# analysis:
-#   - use 40 days
-#   - remove linear trend
-#   - plot
-#   - calculate Rayleigh
-#   - extract a single consist
-#   - plot and compare to real signal
-#   - extract multiple and compare
-#   - Do same for longer data period (e.g. year)
+
+# Then add model data:
+
+
