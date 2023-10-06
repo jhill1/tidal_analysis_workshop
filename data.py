@@ -21,6 +21,17 @@ def read_and_process_data(filename):
 
     return tide_data
 
+def extract_single_year_remove_mean(year, data):
+    year_string_start = str(year)+"0101"
+    year_string_end = str(year)+"1231"
+    year_data = data.loc[year_string_start:year_string_end, ['Tide']]
+    # remove mean to oscillate around zero
+    mmm = np.mean(year_data['Tide'])
+    year_data['Tide'] -= mmm
+
+    return year_data
+
+
 # fetch our data and store
 for url in urls:
     file_name = os.path.basename(url) # get the full path to the file
@@ -46,16 +57,9 @@ ax.legend()
 ax.set_xlim([datetime.date(2008, 6, 1), datetime.date(2008, 7, 1)])
 fig_summary.tight_layout()
 
-FD_2008 = Fort_Denison.loc['20080101':'20081231', ['Tide']]
-BI_2008 = Booby_Island.loc['20080101':'20081231', ['Tide']]
-F_2008 = Freemantle.loc['20080101':'20081231', ['Tide']]
-# remove mean to oscillate around zero
-mmm = np.mean(FD_2008['Tide'])
-FD_2008['Tide'] -= mmm
-mmm = np.mean(BI_2008['Tide'])
-BI_2008 -= mmm
-mmm = np.mean(F_2008['Tide'])
-F_2008 -= mmm
+FD_2008 = extract_single_year_remove_mean(2008, Fort_Denison)
+BI_2008 = extract_single_year_remove_mean(2008, Booby_Island)
+F_2008 = extract_single_year_remove_mean(2008, Freemantle)
 
 fig_summary=plt.figure()
 ax=fig_summary.add_subplot(111)
@@ -72,14 +76,11 @@ fig_summary.tight_layout()
 
 import uptide
 tide = uptide.Tides(['M2'])
-
-
-
 tide.set_initial_time(datetime.datetime(2008,1,1,0,0,0))
 seconds_since = (F_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
 amp,pha = uptide.harmonic_analysis(tide, F_2008['Tide'].to_numpy()/1000, seconds_since)
 
-# give 0.053m for M2. Actual is 0,052m
+# gives 0.053m for M2. Actual is 0,052m
 
 seconds_since = (FD_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
 amp,pha = uptide.harmonic_analysis(tide, FD_2008['Tide'].to_numpy()/1000, seconds_since)
@@ -88,12 +89,39 @@ amp,pha = uptide.harmonic_analysis(tide, FD_2008['Tide'].to_numpy()/1000, second
 seconds_since = (BI_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0).timestamp()
 amp,pha = uptide.harmonic_analysis(tide, BI_2008['Tide'].to_numpy()/1000, seconds_since)
 
+seconds_per_day = 24*60*60
 
 import pytz
 tz = pytz.timezone("Australia/Sydney")
 tide.set_initial_time(datetime.datetime(2008,1,1,0,0,0))
-seconds_since = (BI_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0,tzinfo=tz).timestamp()
+seconds_since = (FD_2008.index.astype('int64').to_numpy()/1e9) - datetime.datetime(2008,1,1,0,0,0,tzinfo=tz).timestamp()
 
+
+constituents  = ['M2', 'S2', 'N2', 'K2', 'O1', 'P1', 'Q1', 'M4']
+print(uptide.select_constituents(constituents,15*24*60*60))
+tide = uptide.Tides(['K1', 'O1'])
+print(tide.get_minimum_Rayleigh_period()/86400.)
+tide = uptide.Tides(['K1', 'M2'])
+print(tide.get_minimum_Rayleigh_period()/86400.)
+
+
+tide = uptide.Tides(['M2'])
+tide.set_initial_time(datetime.datetime(2008,1,1,0,0,0))
+amp = [0.50125979]
+pha = [4.18331822]
+
+t = np.arange(0, 365*24*3600, 600)
+eta = tide.from_amplitude_phase(amp, pha, t)
+fig_summary=plt.figure()
+ax=fig_summary.add_subplot(111)
+fd = ax.plot(FD_2008['Tide'], color="blue", lw=1, label="Fort Denison")
+bi = ax.plot(t, eta, color="orange", lw=1, label="M2 only")
+ax.set_xlabel("Date")
+ax.set_ylabel("Water height (mm)")
+ax.tick_params(axis='x', rotation=45)
+ax.legend()
+#ax.set_xlim([datetime.date(2008, 6, 1), datetime.date(2008, 7, 1)])
+fig_summary.tight_layout()
 
 
 # wget data
